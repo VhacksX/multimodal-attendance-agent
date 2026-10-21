@@ -1,15 +1,5 @@
-fastapi
-uvicorn
+streamlit
 opencv-python-headless
-mediapipe
 numpy
 pandas
-python-multipart
-websockets
-sqlalchemy
-librosa
-soundfile
-groq
-deep-sort-realtime
-python-dotenv
-streamlit
+plotly
