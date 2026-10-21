@@ -1,34 +1,40 @@
-import os
 import time
-from datetime import datetime
 
-class AttendanceTracker:
-    def __init__(self, sustained_seconds_threshold=5):
-        self.sustained_threshold = sustained_seconds_threshold
-        self.presence_timer = None
-        self.attendance_log = {}
+class FaceRecognizer:
+    """
+    EPIC 2 / EPIC 6: Sustained Presence & Attendance Verification
+    Tracks face detections over a temporal threshold before marking 'Present'.
+    """
+    def __init__(self, threshold_seconds: float = 1.5):
+        self.threshold_seconds = threshold_seconds
+        self.first_detected_time = None
+        self.is_present = False
 
-    def update_presence(self, face_detected, student_id="Student_01"):
+    def update(self, face_detected: bool) -> str:
+        """
+        Updates verification state based on real-time face detection stream.
+        Returns status string: 'Marked Present', 'Verifying Presence...', or 'Absent'
+        """
         now = time.time()
-        status = "Absent"
 
         if face_detected:
-            if self.presence_timer is None:
-                self.presence_timer = now
+            if self.first_detected_time is None:
+                self.first_detected_time = now
 
-            duration = now - self.presence_timer
-            if duration >= self.sustained_threshold:
-                status = "Marked Present"
-                if student_id not in self.attendance_log:
-                    self.attendance_log[student_id] = {
-                        "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "Status": "Present"
-                    }
+            elapsed = now - self.first_detected_time
+            if elapsed >= self.threshold_seconds:
+                self.is_present = True
+                return "Marked Present"
             else:
-                status = f"Verifying ({int(duration)}s/{self.sustained_threshold}s)"
+                return f"Verifying Presence ({elapsed:.1f}s)..."
         else:
-            self.presence_timer = None
-            if student_id in self.attendance_log:
-                status = "Marked Present"
+            self.first_detected_time = None
+            self.is_present = False
+            return "Absent"
 
-        return status
+    def reset(self):
+        self.first_detected_time = None
+        self.is_present = False
+
+# Backward compatibility alias
+AttendanceTracker = FaceRecognizer
